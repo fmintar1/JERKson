@@ -18,15 +18,15 @@ public class GroceryReporter {
     }
     public int itemCounter(String name) {
         int counter = 0;
-        for (int i = 0; i < storage.size(); i++) {
-            if (storage.get(i).getName().equals(name)) counter++;
+        for (Item item : storage) {
+            if (item.getName().equals(name)) counter++;
         }
         return counter;
     }
     public int priceCounter(String name, Double price) {
         int counter = 0;
-        for (int i = 0; i < storage.size(); i++) {
-            if (storage.get(i).getName().equals(name) && storage.get(i).getPrice().equals(price)) counter++;
+        for (Item item : storage) {
+            if (item.getName().equals(name) && item.getPrice().equals(price)) counter++;
         }
         return counter;
     }
