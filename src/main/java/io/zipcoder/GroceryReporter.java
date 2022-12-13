@@ -1,94 +1,63 @@
 package io.zipcoder;
-
 import io.zipcoder.utils.FileReader;
 import io.zipcoder.utils.Item;
-
 import java.util.*;
-
 public class GroceryReporter {
-    int milkCounter = 0;
-    int breadCounter = 0;
-    int cookiesCounter = 0;
-    int applesCounter = 0;
-    int milkPrice1Counter = 0;
-    int milkPrice2Counter = 0;
-    int breadPriceCounter = 0;
-    int cookiesPriceCounter = 0;
-    int applesPrice1Counter = 0;
-    int applesPrice2Counter = 0;
-    double milkPrice1 = 0;
-    double milkPrice2 = 0;
-    double breadPrice = 0;
-    double cookiesPrice = 0;
-    double applesPrice1 = 0;
-    double applesPrice2 = 0;
+    double milkPrice1 = 3.23, milkPrice2 = 1.23;
+    double breadPrice = 1.23;
+    double cookiesPrice = 2.25;
+    double applesPrice1 = 0.25, applesPrice2 = 0.23;
     private final String originalFileText;
+    private ItemParser parser;
     private List<Item> storage;
-    private ItemParser parser = new ItemParser();
+    StringBuilder sb = new StringBuilder();
     public GroceryReporter(String jerksonFileName) {
         this.originalFileText = FileReader.readFile(jerksonFileName);
+        this.parser = new ItemParser();
+        this.storage = parser.parseItemList(originalFileText);
     }
-    public void counterOver9000() {
-        for(int i = 0; i < storage.size(); i++) {
-            if (storage.get(i).getName().equals("milk")) milkCounter++;
-            if (storage.get(i).getName().equals("bread")) breadCounter++;
-            if (storage.get(i).getName().equals("cookies")) cookiesCounter++;
-            if (storage.get(i).getName().equals("apples")) applesCounter++;
-            if (storage.get(i).getName().equals("milk") && storage.get(i).getPrice().equals(3.23)) {
-                milkPrice1Counter++;
-                milkPrice1 = storage.get(i).getPrice();
-            }
-            if (storage.get(i).getName().equals("milk") && storage.get(i).getPrice().equals(1.23)) {
-                milkPrice2Counter++;
-                milkPrice2 = storage.get(i).getPrice();
-            }
-            if (storage.get(i).getName().equals("bread") && storage.get(i).getPrice().equals(1.23)) {
-                breadPriceCounter++;
-                breadPrice = storage.get(i).getPrice();
-            }
-            if (storage.get(i).getName().equals("cookies") && storage.get(i).getPrice().equals(2.25)) {
-                cookiesPriceCounter++;
-                cookiesPrice = storage.get(i).getPrice();
-            }
-            if (storage.get(i).getName().equals("apples") && storage.get(i).getPrice().equals(0.25)) {
-                applesPrice1Counter++;
-                applesPrice1 = storage.get(i).getPrice();
-            }
-            if (storage.get(i).getName().equals("apples") && storage.get(i).getPrice().equals(0.23)) {
-                applesPrice2Counter++;
-                applesPrice2 = storage.get(i).getPrice();
-            }
+    public int itemCounter(String name) {
+        int counter = 0;
+        for (int i = 0; i < storage.size(); i++) {
+            if (storage.get(i).getName().equals(name)) counter++;
         }
+        return counter;
+    }
+    public int priceCounter(String name, Double price) {
+        int counter = 0;
+        for (int i = 0; i < storage.size(); i++) {
+            if (storage.get(i).getName().equals(name) && storage.get(i).getPrice().equals(price)) counter++;
+        }
+        return counter;
     }
     @Override
     public String toString() {
-        this.storage = parser.parseItemList(originalFileText);
-        counterOver9000();
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format("name:%8s \t\t %s: %d %s\n","Milk","seen",milkCounter,"times"))
-                .append("============= \t \t =============\n")
-                .append(String.format("Price: \t%5.2f\t\t %s: %d %s\n",milkPrice1,"seen",milkPrice1Counter,"times"))
-                .append("-------------\t\t -------------\n")
-                .append(String.format("Price: \t%5.2f\t\t %s: %d %s\n",milkPrice2,"seen",milkPrice2Counter,"time"))
+        sb.append(firstPriceItem("Milk", itemCounter("milk"), milkPrice1, priceCounter("milk",milkPrice1))
+                .append(secondPriceItem(milkPrice2, priceCounter("milk", milkPrice2)))
+                .append(firstPriceItem("Bread", itemCounter("bread"), breadPrice, priceCounter("bread",breadPrice)))
                 .append("\n")
-                .append(String.format("name:%8s \t\t %s: %d %s\n","Bread","seen",breadCounter,"times"))
-                .append("============= \t \t =============\n")
-                .append(String.format("Price: \t%5.2f\t\t %s: %d %s\n",breadPrice,"seen",breadPriceCounter,"times"))
-                .append("-------------\t\t -------------\n")
+                .append(firstPriceItem("Cookies", itemCounter("cookies"), cookiesPrice, priceCounter("cookies", cookiesPrice)))
                 .append("\n")
-                .append(String.format("name:%8s \t\t %s: %d %s\n","Cookies","seen",cookiesCounter,"times"))
-                .append("============= \t \t =============\n")
-                .append(String.format("Price: \t%5.2f\t\t %s: %d %s\n",cookiesPrice,"seen",cookiesPriceCounter,"times"))
-                .append("-------------\t\t -------------\n")
-                .append("\n")
-                .append(String.format("name:%8s \t\t %s: %d %s\n","Apples","seen",applesCounter,"times"))
-                .append("============= \t \t =============\n")
-                .append(String.format("Price: \t%5.2f\t\t %s: %d %s\n",applesPrice1,"seen",applesPrice1Counter,"times"))
-                .append("-------------\t\t -------------\n")
-                .append(String.format("Price: \t%5.2f\t\t %s: %d %s\n",applesPrice2,"seen",applesPrice2Counter,"times"))
-                .append("\n")
-                .append(String.format("%-15s\t \t %s: %d %s","Errors","seen",parser.getErrorCount(),"times"))
-                .append("\n");
+                .append(firstPriceItem("Apples", itemCounter("apples"), applesPrice1, priceCounter("apples", applesPrice1)))
+                .append(secondPriceItem(applesPrice2, priceCounter("apples", applesPrice2)))
+                .append(String.format("%-15s\t \t %s: %d %s", "Errors", "seen", parser.getErrorCount(), "times"))
+                .append("\n"));
         return sb.toString();
+    }
+    public StringBuilder firstPriceItem(String name, int itemsCounter, double itemsPrice, int itemsPriceCounter) {
+        StringBuilder temp = new StringBuilder();
+        temp.append(String.format("name:%8s \t\t %s: %d %s\n", name, "seen", itemsCounter, "times"))
+                .append("============= \t \t =============\n")
+                .append(String.format("Price: \t%5.2f\t\t %s: %d %s\n", itemsPrice, "seen", itemsPriceCounter, "times"))
+                .append("-------------\t\t -------------\n");
+        return temp;
+    }
+    public StringBuilder secondPriceItem(double itemsPrice, int itemsPriceCounter) {
+        String times = "times";
+        if(itemsPriceCounter == 1) times = "time";
+        StringBuilder temp = new StringBuilder();
+        temp.append(String.format("Price: \t%5.2f\t\t %s: %d %s\n", itemsPrice, "seen", itemsPriceCounter, times))
+                .append("\n");
+        return temp;
     }
 }
